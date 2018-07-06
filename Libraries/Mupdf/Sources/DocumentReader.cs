@@ -19,7 +19,7 @@
 using Cube.FileSystem;
 using System.Diagnostics;
 
-namespace Cube.Pdf.Mupdf.Sources
+namespace Cube.Pdf.Mupdf
 {
     /* --------------------------------------------------------------------- */
     ///
@@ -113,13 +113,14 @@ namespace Cube.Pdf.Mupdf.Sources
         public DocumentReader(string src, IQuery<string> query, IO io) : base(io)
         {
             Debug.Assert(io != null);
+            _core = MupdfReader.Create(src, query, io);
+            Debug.Assert(_core != null);
 
-            // not implemented
-            File        = null;
-            Pages       = null;
-            Metadata    = null;
-            Encryption  = null;
-            Attachments = null;
+            File        = _core.File;
+            Pages       = null; // not implemented
+            Metadata    = null; // not implemented
+            Encryption  = null; // not implemented
+            Attachments = null; // not implemented
         }
 
         #endregion
@@ -141,9 +142,13 @@ namespace Cube.Pdf.Mupdf.Sources
         /* ----------------------------------------------------------------- */
         protected override void Dispose(bool disposing)
         {
-            // not implemented
+            _core.Dispose();
         }
 
+        #endregion
+
+        #region Fields
+        private readonly MupdfReader _core;
         #endregion
     }
 }
