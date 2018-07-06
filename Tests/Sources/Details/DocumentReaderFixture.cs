@@ -66,6 +66,7 @@ namespace Cube.Pdf.Tests
             {
                 { nameof(Cube.Pdf.Itext),  (s, q, io) => new Cube.Pdf.Itext.DocumentReader(s, q, io)  },
                 { nameof(Cube.Pdf.Pdfium), (s, q, io) => new Cube.Pdf.Pdfium.DocumentReader(s, q, io) },
+                { nameof(Cube.Pdf.Mupdf),  (s, q, io) => new Cube.Pdf.Mupdf.DocumentReader(s, q, io)  },
             };
 
         /* ----------------------------------------------------------------- */
