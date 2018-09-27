@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 /* ------------------------------------------------------------------------- */
-using Cube.FileSystem.Tests;
+using Cube.FileSystem.TestService;
 using Cube.Forms;
 using Cube.Generics;
 using Cube.Pdf.App.Converter;
@@ -27,17 +27,17 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Cube.Pdf.Tests.Converter
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// GlobalSetup
+    /// ViewModelFixture
     ///
     /// <summary>
-    /// NUnit で最初に実行する処理を記述するテストです。
+    /// Provides functionality to test ViewModel classes.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -198,8 +198,15 @@ namespace Cube.Pdf.Tests.Converter
         protected string[] Combine(string[] args, string src)
         {
             var tmp = GetResultsWith(Guid.NewGuid().ToString("D"));
-            IO.Copy(GetExamplesWith(src), tmp);
-            return args.Concat(new[] { "/InputFile", tmp }).ToArray();
+            IO.Copy(GetExamplesWith(src), tmp, true);
+
+            using (var stream = IO.OpenRead(tmp))
+            {
+                var hash = new SHA256CryptoServiceProvider()
+                           .ComputeHash(stream)
+                           .Aggregate("", (s, b) => s + $"{b:X2}");
+                return args.Concat(new[] { "/InputFile", tmp, "/Digest", hash }).ToArray();
+            }
         }
 
         /* ----------------------------------------------------------------- */
@@ -258,20 +265,22 @@ namespace Cube.Pdf.Tests.Converter
         /// Wait
         ///
         /// <summary>
-        /// 変換処理を待機します。
+        /// Waits for converting the document.
         /// </summary>
         ///
         /// <param name="vm">ViewModel</param>
         ///
-        /// <returns>処理が正常に完了したかどうか</returns>
+        /// <returns>true for success.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        protected bool Wait(MainViewModel vm)
+        protected bool WaitConv(MainViewModel vm)
         {
             Message = string.Empty;
+
+            var closed = false;
+            vm.Messenger.Close.Subscribe(() => closed = true);
             vm.Convert();
-            if (!WaitAsync(vm, () => vm.IsBusy == true).Result) return false;
-            return WaitAsync(vm, () => vm.IsBusy == false).Result;
+            return Wait.For(() => closed, TimeSpan.FromSeconds(10));
         }
 
         /* ----------------------------------------------------------------- */
@@ -279,19 +288,19 @@ namespace Cube.Pdf.Tests.Converter
         /// WaitMessage
         ///
         /// <summary>
-        /// メッセージを受信するまで待機します。
+        /// Waits for receiving a message.
         /// </summary>
         ///
         /// <param name="vm">ViewModel</param>
         ///
-        /// <returns>メッセージを受信したかどうか</returns>
+        /// <returns>true for receiving a message.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected bool WaitMessage(MainViewModel vm)
         {
             Message = string.Empty;
             vm.Convert();
-            return WaitAsync(vm, () => Message.HasValue()).Result;
+            return Wait.For(() => Message.HasValue());
         }
 
         #endregion
@@ -349,12 +358,12 @@ namespace Cube.Pdf.Tests.Converter
         /* ----------------------------------------------------------------- */
         private void Set(MetadataViewModel vm, Metadata src)
         {
-            vm.Title      = src.Title;
-            vm.Author     = src.Author;
-            vm.Subject    = src.Subject;
-            vm.Keywords   = src.Keywords;
-            vm.Creator    = src.Creator;
-            vm.ViewOption = src.ViewOption;
+            vm.Title          = src.Title;
+            vm.Author         = src.Author;
+            vm.Subject        = src.Subject;
+            vm.Keywords       = src.Keywords;
+            vm.Creator        = src.Creator;
+            vm.Viewer = src.Viewer;
         }
 
         /* ----------------------------------------------------------------- */
@@ -379,25 +388,6 @@ namespace Cube.Pdf.Tests.Converter
             vm.AllowCopy        = src.Permission.CopyContents.IsAllowed();
             vm.AllowInputForm   = src.Permission.InputForm.IsAllowed();
             vm.AllowModify      = src.Permission.ModifyContents.IsAllowed();
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// WaitAsync
-        ///
-        /// <summary>
-        /// 変換処理を非同期で待機します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private async Task<bool> WaitAsync(MainViewModel vm, Func<bool> cond)
-        {
-            for (var i = 0; i < 100; ++i)
-            {
-                if (cond()) return true;
-                await Task.Delay(100).ConfigureAwait(false);
-            }
-            return false;
         }
 
         #endregion

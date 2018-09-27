@@ -15,7 +15,6 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using Cube.Pdf.Pdfium.PdfiumApi;
 using System;
 using System.Drawing;
 
@@ -47,36 +46,35 @@ namespace Cube.Pdf.Pdfium
         /// <param name="page">ページ情報</param>
         /// <param name="point">描画開始座標</param>
         /// <param name="size">描画サイズ</param>
-        /// <param name="angle">回転角度</param>
         /// <param name="flags">描画フラグ</param>
         ///
         /* ----------------------------------------------------------------- */
         public static void Render(this PdfiumReader src, Graphics dest, Page page,
-            PointF point, SizeF size, Angle angle, int flags)
+            PointF point, SizeF size, int flags)
         {
             var retry = 5;
-            var hp = Facade.FPDF_LoadPage(src.RawObject, page.Number - 1, retry);
-            if (hp == IntPtr.Zero) throw PdfiumLibrary.GetLoadException();
+            var hp = src.Invoke(e => PdfiumApi.FPDF_LoadPage(e, page.Number - 1, retry));
+            if (hp == IntPtr.Zero) throw src.GetLastError();
             var hdc = dest.GetHdc();
 
             try
             {
-                Facade.FPDF_RenderPage(
+                src.Invoke(_ => PdfiumApi.FPDF_RenderPage(
                     hdc,
                     hp,
                     (int)point.X,
                     (int)point.Y,
                     (int)size.Width,
                     (int)size.Height,
-                    GetRotation(angle),
+                    GetRotation(page.Delta),
                     flags,
                     retry
-                );
+                ));
             }
             finally
             {
                 dest.ReleaseHdc(hdc);
-                Facade.FPDF_ClosePage(hp);
+                PdfiumApi.FPDF_ClosePage(hp);
             }
         }
 

@@ -56,14 +56,13 @@ namespace Cube.Pdf.Itext
         /// <returns>Page オブジェクト</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static Page GetPage(this PdfReader src, PdfFile file, int pagenum) => new Page
-        {
-            File       = file,
-            Number     = pagenum,
-            Size       = src.GetPageSize(pagenum).ToSize(),
-            Rotation   = new Angle(src.GetPageRotation(pagenum)),
-            Resolution = file.Resolution
-        };
+        public static Page GetPage(this PdfReader src, PdfFile file, int pagenum) => new Page(
+            file,                                    // File
+            pagenum,                                 // Number
+            src.GetPageSize(pagenum).ToSize(),       // Size
+            new Angle(src.GetPageRotation(pagenum)), // Rotation
+            file.Resolution                          // Resolution
+        );
 
         /* ----------------------------------------------------------------- */
         ///
@@ -80,14 +79,14 @@ namespace Cube.Pdf.Itext
         /* ----------------------------------------------------------------- */
         public static Metadata GetMetadata(this PdfReader src) => new Metadata
         {
-            Version    = new Version(1, src.PdfVersion - '0', 0, 0),
-            Author     = src.Info.ContainsKey("Author")   ? src.Info["Author"]   : string.Empty,
-            Title      = src.Info.ContainsKey("Title")    ? src.Info["Title"]    : string.Empty,
-            Subject    = src.Info.ContainsKey("Subject")  ? src.Info["Subject"]  : string.Empty,
-            Keywords   = src.Info.ContainsKey("Keywords") ? src.Info["Keywords"] : string.Empty,
-            Creator    = src.Info.ContainsKey("Creator")  ? src.Info["Creator"]  : string.Empty,
-            Producer   = src.Info.ContainsKey("Producer") ? src.Info["Producer"] : string.Empty,
-            ViewOption = ViewOptionFactory.Create(src.SimpleViewerPreferences),
+            Version  = new Version(1, src.PdfVersion - '0', 0, 0),
+            Author   = src.Info.ContainsKey("Author")   ? src.Info["Author"]   : string.Empty,
+            Title    = src.Info.ContainsKey("Title")    ? src.Info["Title"]    : string.Empty,
+            Subject  = src.Info.ContainsKey("Subject")  ? src.Info["Subject"]  : string.Empty,
+            Keywords = src.Info.ContainsKey("Keywords") ? src.Info["Keywords"] : string.Empty,
+            Creator  = src.Info.ContainsKey("Creator")  ? src.Info["Creator"]  : string.Empty,
+            Producer = src.Info.ContainsKey("Producer") ? src.Info["Producer"] : string.Empty,
+            Viewer   = ViewerPreferencesFactory.Create(src.SimpleViewerPreferences),
         };
 
         /* ----------------------------------------------------------------- */
@@ -250,7 +249,7 @@ namespace Cube.Pdf.Itext
         /* ----------------------------------------------------------------- */
         public static void Rotate(this PdfReader src, Page page)
         {
-            var rot = page.Rotation.Degree;
+            var rot = (page.Rotation + page.Delta).Degree;
             var cmp = src.GetPageRotation(page.Number);
             var dic = src.GetPageN(page.Number);
             if (rot != cmp) dic.Put(PdfName.ROTATE, new PdfNumber(rot));

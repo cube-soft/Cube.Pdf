@@ -18,6 +18,7 @@
 /* ------------------------------------------------------------------------- */
 using Cube.Forms.Behaviors;
 using Cube.Forms.Controls;
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 
@@ -49,7 +50,6 @@ namespace Cube.Pdf.App.Converter
         {
             InitializeComponent();
 
-            Shown += (s, e) => BringToFront();
             ExitButton.Click += (s, e) => Close();
 
             new PathBehavior(SourceTextBox, PathToolTip);
@@ -149,6 +149,23 @@ namespace Cube.Pdf.App.Converter
 
         /* ----------------------------------------------------------------- */
         ///
+        /// OnShown
+        ///
+        /// <summary>
+        /// Occurs when the Shown event is fired.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            Activate();
+            TopMost = true;
+            TopMost = false;
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// UpdateString
         ///
         /// <summary>
@@ -165,7 +182,7 @@ namespace Cube.Pdf.App.Converter
             FormatComboBox.Bind(ViewResource.Formats);
             FormatOptionComboBox.Bind(ViewResource.FormatOptions);
             SaveOptionComboBox.Bind(ViewResource.SaveOptions);
-            ViewOptionComboBox.Bind(ViewResource.ViewOptions);
+            ViewerPreferencesComboBox.Bind(ViewResource.ViewerPreferences);
             PostProcessComboBox.Bind(ViewResource.PostProcesses);
             LanguageComboBox.Bind(ViewResource.Languages);
         }

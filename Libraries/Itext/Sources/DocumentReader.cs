@@ -46,10 +46,11 @@ namespace Cube.Pdf.Itext
         /// DocumentReader
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the DocumentReader class
+        /// with the specified arguments..
         /// </summary>
         ///
-        /// <param name="src">PDF ファイルのパス</param>
+        /// <param name="src">PDF document path.</param>
         ///
         /* ----------------------------------------------------------------- */
         public DocumentReader(string src) : this(src, string.Empty) { }
@@ -59,102 +60,70 @@ namespace Cube.Pdf.Itext
         /// DocumentReader
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the DocumentReader class
+        /// with the specified arguments..
         /// </summary>
         ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="password">パスワード</param>
+        /// <param name="src">PDF document path.</param>
+        /// <param name="password">Password string.</param>
         ///
         /* ----------------------------------------------------------------- */
         public DocumentReader(string src, string password) :
-            this(src, password, new IO()) { }
+            this(src, password, true, new IO()) { }
 
         /* ----------------------------------------------------------------- */
         ///
         /// DocumentReader
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the DocumentReader class
+        /// with the specified arguments.
         /// </summary>
         ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="query">パスワード用オブジェクト</param>
+        /// <param name="src">PDF document path.</param>
+        /// <param name="query">Password query.</param>
         ///
         /* ----------------------------------------------------------------- */
         public DocumentReader(string src, IQuery<string> query) :
-            this(src, query, new IO()) { }
+            this(src, query, true, new IO()) { }
 
         /* ----------------------------------------------------------------- */
         ///
         /// DocumentReader
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the DocumentReader class
+        /// with the specified arguments.
         /// </summary>
         ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="password">パスワード</param>
-        /// <param name="io">I/O オブジェクト</param>
+        /// <param name="src">PDF document path.</param>
+        /// <param name="password">Password string.</param>
+        /// <param name="partial">true for partial reading mode.</param>
+        /// <param name="io">I/O handler.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public DocumentReader(string src, string password, IO io) :
-            this(src, password, false, io) { }
+        public DocumentReader(string src, string password, bool partial, IO io) :
+            this(src, new OnceQuery<string>(password), partial, io) { }
 
         /* ----------------------------------------------------------------- */
         ///
         /// DocumentReader
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the DocumentReader class
+        /// with the specified arguments.
         /// </summary>
         ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="query">パスワード用オブジェクト</param>
-        /// <param name="io">I/O オブジェクト</param>
+        /// <param name="src">PDF document path.</param>
+        /// <param name="query">Password query.</param>
+        /// <param name="partial">true for partial reading mode.</param>
+        /// <param name="io">I/O handler.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public DocumentReader(string src, IQuery<string> query, IO io) :
-            this(src, query, false, io) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// DocumentReader
-        ///
-        /// <summary>
-        /// オブジェクトを初期化します。
-        /// </summary>
-        ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="password">パスワード</param>
-        /// <param name="denyUserPassword">
-        /// ユーザパスワードの入力を拒否するかどうか
-        /// </param>
-        /// <param name="io">I/O オブジェクト</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public DocumentReader(string src, string password, bool denyUserPassword, IO io) :
-            this(src, new OnceQuery<string>(password), denyUserPassword, io) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// DocumentReader
-        ///
-        /// <summary>
-        /// オブジェクトを初期化します。
-        /// </summary>
-        ///
-        /// <param name="src">PDF ファイルのパス</param>
-        /// <param name="query">パスワード用オブジェクト</param>
-        /// <param name="denyUserPassword">
-        /// ユーザパスワードの入力を拒否するかどうか
-        /// </param>
-        /// <param name="io">I/O オブジェクト</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public DocumentReader(string src, IQuery<string> query, bool denyUserPassword, IO io) : base(io)
+        public DocumentReader(string src, IQuery<string> query, bool partial, IO io) : base(io)
         {
             Debug.Assert(io != null);
-            _core = ReaderFactory.Create(src, query, denyUserPassword, out string password);
+            _core = ReaderFactory.Create(src, query, partial, out string password);
             Debug.Assert(_core != null);
 
             var f = new PdfFile(src, password, io.GetRefreshable())
@@ -209,14 +178,12 @@ namespace Cube.Pdf.Itext
             return dest;
         }
 
-        #region IDisposable
-
         /* ----------------------------------------------------------------- */
         ///
         /// Dispose
         ///
         /// <summary>
-        /// オブジェクトを破棄する際に必要な終了処理を実行します。
+        /// リソースを開放します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -224,8 +191,6 @@ namespace Cube.Pdf.Itext
         {
             if (disposing) _core.Dispose();
         }
-
-        #endregion
 
         #endregion
 

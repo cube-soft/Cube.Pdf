@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 /* ------------------------------------------------------------------------- */
-using Cube.FileSystem.Tests;
+using Cube.FileSystem.TestService;
 using Cube.Pdf.App.Converter;
 using Cube.Pdf.Ghostscript;
 using NUnit.Framework;
@@ -62,7 +62,7 @@ namespace Cube.Pdf.Tests.Converter
             Assert.That(dest.UserName,           Is.EqualTo(Environment.UserName));
             Assert.That(dest.DocumentName.Value, Is.Empty);
             Assert.That(dest.DocumentName.Name,  Is.EqualTo("CubePDF"));
-            Assert.That(dest.Version.ToString(), Is.EqualTo("1.0.0RC12"));
+            Assert.That(dest.Version.ToString(), Is.EqualTo("1.0.0RC14"));
             Assert.That(dest.Startup.Name,       Is.EqualTo("cubepdf-checker"));
             Assert.That(dest.Startup.Command,    Does.Contain("cubepdf-checker.exe\""));
             Assert.That(dest.Startup.Command,    Does.EndWith("CubePDF"));
@@ -126,13 +126,12 @@ namespace Cube.Pdf.Tests.Converter
             Assert.That(ec.UserPassword,       Is.Empty);
 
             var pm = dest.Encryption.Permission;
-            Assert.That(pm.Accessibility,      Is.EqualTo(PermissionMethod.Allow), nameof(pm.Accessibility));
-            Assert.That(pm.Assemble,           Is.EqualTo(PermissionMethod.Deny),  nameof(pm.Assemble));
-            Assert.That(pm.CopyContents,       Is.EqualTo(PermissionMethod.Deny),  nameof(pm.CopyContents));
-            Assert.That(pm.InputForm,          Is.EqualTo(PermissionMethod.Deny),  nameof(pm.InputForm));
-            Assert.That(pm.ModifyAnnotations,  Is.EqualTo(PermissionMethod.Deny),  nameof(pm.ModifyAnnotations));
-            Assert.That(pm.ModifyContents,     Is.EqualTo(PermissionMethod.Deny),  nameof(pm.ModifyContents));
-            Assert.That(pm.Print,              Is.EqualTo(PermissionMethod.Deny),  nameof(pm.Print));
+            Assert.That(pm.Accessibility,      Is.EqualTo(PermissionValue.Allow), nameof(pm.Accessibility));
+            Assert.That(pm.CopyContents,       Is.EqualTo(PermissionValue.Deny),  nameof(pm.CopyContents));
+            Assert.That(pm.InputForm,          Is.EqualTo(PermissionValue.Deny),  nameof(pm.InputForm));
+            Assert.That(pm.ModifyAnnotations,  Is.EqualTo(PermissionValue.Deny),  nameof(pm.ModifyAnnotations));
+            Assert.That(pm.ModifyContents,     Is.EqualTo(PermissionValue.Deny),  nameof(pm.ModifyContents));
+            Assert.That(pm.Print,              Is.EqualTo(PermissionValue.Deny),  nameof(pm.Print));
         }
 
         /* ----------------------------------------------------------------- */

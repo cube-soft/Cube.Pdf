@@ -73,9 +73,8 @@ namespace Cube.Pdf.Tests.Converter
                 // Test for SaveOption
                 if (precopy) IO.Copy(GetExamplesWith("Sample.pdf"), vms.Destination);
 
-                Assert.That(vm.IsBusy, Is.False);
                 vm.Messenger.MessageBox.Subscribe(SetMessage);
-                Assert.That(Wait(vm), Is.True, "Timeout");
+                Assert.That(WaitConv(vm), Is.True, "Timeout");
             }
 
             Assert.That(IO.Exists(dest.Value.Source),      Is.False, dest.Value.Source);
@@ -271,12 +270,12 @@ namespace Cube.Pdf.Tests.Converter
                         Linearization    = true,
                         Metadata         = new Metadata
                         {
-                            Title      = "Linearization test title",
-                            Author     = "Linearization test author",
-                            Subject    = "Linearization test Subject",
-                            Keywords   = "Linearization test keywords",
-                            Creator    = "Linearization test creator",
-                            ViewOption = ViewOption.SinglePage,
+                            Title          = "Linearization test title",
+                            Author         = "Linearization test author",
+                            Subject        = "Linearization test Subject",
+                            Keywords       = "Linearization test keywords",
+                            Creator        = "Linearization test creator",
+                            Viewer = ViewerPreferences.SinglePage,
                         }
                     },
                     CreateArgs("PDF テスト (Linearization)")
@@ -297,23 +296,22 @@ namespace Cube.Pdf.Tests.Converter
                             OpenWithPassword = true,
                             Permission       = new Permission
                             {
-                                Accessibility     = PermissionMethod.Allow,
-                                Assemble          = PermissionMethod.Deny,
-                                CopyContents      = PermissionMethod.Deny,
-                                InputForm         = PermissionMethod.Allow,
-                                ModifyAnnotations = PermissionMethod.Deny,
-                                ModifyContents    = PermissionMethod.Deny,
-                                Print             = PermissionMethod.Deny,
+                                Accessibility     = PermissionValue.Allow,
+                                CopyContents      = PermissionValue.Deny,
+                                InputForm         = PermissionValue.Allow,
+                                ModifyAnnotations = PermissionValue.Deny,
+                                ModifyContents    = PermissionValue.Deny,
+                                Print             = PermissionValue.Deny,
                             }
                         },
                         Metadata = new Metadata
                         {
-                            Title      = "Encryption test title",
-                            Author     = "Encryption test author",
-                            Subject    = "Encryption test Subject",
-                            Keywords   = "Encryption test keywords",
-                            Creator    = "Encryption test creator",
-                            ViewOption = ViewOption.SinglePage,
+                            Title          = "Encryption test title",
+                            Author         = "Encryption test author",
+                            Subject        = "Encryption test Subject",
+                            Keywords       = "Encryption test keywords",
+                            Creator        = "Encryption test creator",
+                            Viewer = ViewerPreferences.SinglePage,
                         }
                     },
                     CreateArgs("PDF テスト (Encryption)")

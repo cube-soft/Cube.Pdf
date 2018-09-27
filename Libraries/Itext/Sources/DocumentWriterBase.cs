@@ -168,7 +168,7 @@ namespace Cube.Pdf.Itext
         /// Dispose
         ///
         /// <summary>
-        /// オブジェクトを破棄する際に必要な終了処理を実行します。
+        /// リソースを開放します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -183,8 +183,12 @@ namespace Cube.Pdf.Itext
         /// Dispose
         ///
         /// <summary>
-        /// オブジェクトを破棄する際に必要な終了処理を実行します。
+        /// リソースを開放します。
         /// </summary>
+        ///
+        /// <param name="disposing">
+        /// マネージオブジェクトを開放するかどうか
+        /// </param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void Dispose(bool disposing)
@@ -464,7 +468,7 @@ namespace Cube.Pdf.Itext
         private PdfReader GetRawReader(Page src, PdfFile file)
         {
             var path = src.File.FullName;
-            if (!IsBound(path)) Bind(new DocumentReader(path, file.Password, IO));
+            if (!IsBound(path)) Bind(new DocumentReader(path, file.Password, false, IO));
 
             return _bounds[path] is DocumentReader dest ?
                    dest.RawObject.TryCast<PdfReader>() :

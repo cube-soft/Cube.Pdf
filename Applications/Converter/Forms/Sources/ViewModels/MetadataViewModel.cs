@@ -145,17 +145,17 @@ namespace Cube.Pdf.App.Converter
 
         /* ----------------------------------------------------------------- */
         ///
-        /// ViewOption
+        /// Viewer
         ///
         /// <summary>
         /// 表示オプションを取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public ViewOption ViewOption
+        public ViewerPreferences Viewer
         {
-            get => Model.ViewOption;
-            set => Model.ViewOption = value;
+            get => Model.Viewer;
+            set => Model.Viewer = value;
         }
 
         #endregion

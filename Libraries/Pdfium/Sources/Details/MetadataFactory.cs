@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using Cube.Pdf.Pdfium.PdfiumApi;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Cube.Pdf.Pdfium
@@ -47,16 +47,16 @@ namespace Cube.Pdf.Pdfium
         /// <returns>Metadata</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static Metadata Create(IntPtr core) => new Metadata
+        public static Metadata Create(PdfiumReader core) => new Metadata
         {
-            Version    = GetVersion(core),
-            Title      = GetText(core, nameof(Metadata.Title)),
-            Author     = GetText(core, nameof(Metadata.Author)),
-            Subject    = GetText(core, nameof(Metadata.Subject)),
-            Keywords   = GetText(core, nameof(Metadata.Keywords)),
-            Creator    = GetText(core, nameof(Metadata.Creator)),
-            Producer   = GetText(core, nameof(Metadata.Producer)),
-            ViewOption = ViewOption.None,
+            Version  = GetVersion(core),
+            Title    = GetText(core, nameof(Metadata.Title)),
+            Author   = GetText(core, nameof(Metadata.Author)),
+            Subject  = GetText(core, nameof(Metadata.Subject)),
+            Keywords = GetText(core, nameof(Metadata.Keywords)),
+            Creator  = GetText(core, nameof(Metadata.Creator)),
+            Producer = GetText(core, nameof(Metadata.Producer)),
+            Viewer   = GetPageMode(core),
         };
 
         #endregion
@@ -72,13 +72,13 @@ namespace Cube.Pdf.Pdfium
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private static string GetText(IntPtr core, string name)
+        private static string GetText(PdfiumReader core, string name)
         {
-            var size = Facade.FPDF_GetMetaText(core, name, null, 0);
+            var size = core.Invoke(e => PdfiumApi.FPDF_GetMetaText(e, name, null, 0));
             if (size <= 2) return string.Empty;
 
             var buffer = new byte[size];
-            Facade.FPDF_GetMetaText(core, name, buffer, size);
+            core.Invoke(e => PdfiumApi.FPDF_GetMetaText(e, name, buffer, size));
             return Encoding.Unicode.GetString(buffer, 0, (int)(size - 2));
         }
 
@@ -91,10 +91,33 @@ namespace Cube.Pdf.Pdfium
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private static Version GetVersion(IntPtr core) =>
-            Facade.FPDF_GetFileVersion(core, out var version) ?
+        private static Version GetVersion(PdfiumReader core) => core.Invoke(
+            e => PdfiumApi.FPDF_GetFileVersion(e, out var version) ?
             new Version(version / 10, version % 10) :
-            new Version(1, 7);
+            new Version(1, 7)
+        );
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// GetPageMode
+        ///
+        /// <summary>
+        /// Gets the page mode of the specified PDF document.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        private static ViewerPreferences GetPageMode(PdfiumReader core)
+        {
+            var m = core.Invoke(e => PdfiumApi.FPDFDoc_GetPageMode(e));
+            return new Dictionary<int, ViewerPreferences>
+            {
+                { 1, ViewerPreferences.Outline         },
+                { 2, ViewerPreferences.Thumbnail       },
+                { 3, ViewerPreferences.FullScreen      },
+                { 4, ViewerPreferences.OptionalContent },
+                { 5, ViewerPreferences.Attachment      },
+            }.TryGetValue(m, out var dest) ? dest : ViewerPreferences.None;
+        }
 
         #endregion
     }

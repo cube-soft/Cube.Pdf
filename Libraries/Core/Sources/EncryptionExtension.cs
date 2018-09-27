@@ -25,7 +25,7 @@ namespace Cube.Pdf.Mixin
     /// EncryptionExtension
     ///
     /// <summary>
-    /// Encryption の拡張用クラスです。
+    /// Describes extended methods for the Encryption class.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -35,72 +35,97 @@ namespace Cube.Pdf.Mixin
 
         /* ----------------------------------------------------------------- */
         ///
-        /// DenyAll
+        /// Copy
         ///
         /// <summary>
-        /// 全て操作を禁止します。
+        /// Gets the copied Encryption.
         /// </summary>
         ///
-        /// <param name="src">Encryption オブジェクト</param>
+        /// <param name="src">Original object.</param>
+        ///
+        /// <returns>Copied object.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static void DenyAll(this Encryption src) => src.SetAll(PermissionMethod.Deny);
+        public static Encryption Copy(this Encryption src) => new Encryption
+        {
+            Context          = src.Context,
+            IsSynchronous    = src.IsSynchronous,
+            Enabled          = src.Enabled,
+            Method           = src.Method,
+            OwnerPassword    = src.OwnerPassword,
+            UserPassword     = src.UserPassword,
+            OpenWithPassword = src.OpenWithPassword,
+            Permission       = new Permission(src.Permission.Value),
+        };
 
         /* ----------------------------------------------------------------- */
         ///
-        /// AllowAll
+        /// Deny
         ///
         /// <summary>
-        /// 全て操作を許可します。
+        /// Denies all operations.
         /// </summary>
         ///
-        /// <param name="src">Encryption オブジェクト</param>
+        /// <param name="src">Encryption object.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static void AllowAll(this Encryption src) => src.SetAll(PermissionMethod.Allow);
+        public static void Deny(this Encryption src) => src.Set(PermissionValue.Deny);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Allow
+        ///
+        /// <summary>
+        /// Allows all operations.
+        /// </summary>
+        ///
+        /// <param name="src">Encryption object.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static void Allow(this Encryption src) => src.Set(PermissionValue.Allow);
 
         /* ----------------------------------------------------------------- */
         ///
         /// IsAllowed
         ///
         /// <summary>
-        /// 操作が許可されているかどうかを判別します。
+        /// Determines whether the specified operation is allowed.
         /// </summary>
         ///
-        /// <param name="src">判別対象の操作</param>
+        /// <param name="src">PermissionMethod object.</param>
         ///
-        /// <returns>許可されているかどうか</returns>
+        /// <returns>true for allowed.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static bool IsAllowed(this PermissionMethod src) => src == PermissionMethod.Allow;
+        public static bool IsAllowed(this PermissionValue src) => src == PermissionValue.Allow;
 
         /* ----------------------------------------------------------------- */
         ///
         /// IsDenid
         ///
         /// <summary>
-        /// 操作が禁止されているかどうかを判別します。
+        /// Determines whether the specified operation is denied.
         /// </summary>
         ///
-        /// <param name="src">判別対象の操作</param>
+        /// <param name="src">PermissionMethod object.</param>
         ///
-        /// <returns>禁止されているかどうか</returns>
+        /// <returns>true for denied.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static bool IsDenid(this PermissionMethod src) => src == PermissionMethod.Deny;
+        public static bool IsDenid(this PermissionValue src) => src == PermissionValue.Deny;
 
         /* ----------------------------------------------------------------- */
         ///
         /// RequestPassword
         ///
         /// <summary>
-        /// パスワードの問い合わせを実行します。
+        /// Requests the password for the specified PDF file.
         /// </summary>
         ///
-        /// <param name="query">問い合わせ用オブジェクト</param>
-        /// <param name="src">入力ファイル</param>
+        /// <param name="query">Query object.</param>
+        /// <param name="src">PDF file path.</param>
         ///
-        /// <returns>問い合わせ結果</returns>
+        /// <returns>Query result.</returns>
         ///
         /// <remarks>
         /// 問い合わせ失敗時の挙動を EncryptionException を送出する形に
@@ -129,22 +154,21 @@ namespace Cube.Pdf.Mixin
 
         /* ----------------------------------------------------------------- */
         ///
-        /// SetAll
+        /// Set
         ///
         /// <summary>
-        /// 全て操作に同じ内容を設定します。
+        /// Sets all of the methods to the same permission.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private static void SetAll(this Encryption src, PermissionMethod method)
+        private static void Set(this Encryption src, PermissionValue value)
         {
-            src.Permission.Accessibility     = method;
-            src.Permission.Assemble          = method;
-            src.Permission.CopyContents      = method;
-            src.Permission.InputForm         = method;
-            src.Permission.ModifyAnnotations = method;
-            src.Permission.ModifyContents    = method;
-            src.Permission.Print             = method;
+            src.Permission.Accessibility     = value;
+            src.Permission.CopyContents      = value;
+            src.Permission.InputForm         = value;
+            src.Permission.ModifyAnnotations = value;
+            src.Permission.ModifyContents    = value;
+            src.Permission.Print             = value;
         }
 
         #endregion

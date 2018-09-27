@@ -16,7 +16,7 @@
 //
 /* ------------------------------------------------------------------------- */
 using Cube.FileSystem;
-using Cube.FileSystem.Tests;
+using Cube.FileSystem.TestService;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -64,7 +64,7 @@ namespace Cube.Pdf.Tests
         protected static IDictionary<string, Func<string, IQuery<string>, IO, IDocumentReader>> GetFactory() =>
             new Dictionary<string, Func<string, IQuery<string>, IO, IDocumentReader>>
             {
-                { nameof(Cube.Pdf.Itext),  (s, q, io) => new Cube.Pdf.Itext.DocumentReader(s, q, io)  },
+                { nameof(Cube.Pdf.Itext),  (s, q, io) => new Cube.Pdf.Itext.DocumentReader(s, q, true, io) },
                 { nameof(Cube.Pdf.Pdfium), (s, q, io) => new Cube.Pdf.Pdfium.DocumentReader(s, q, io) },
                 { nameof(Cube.Pdf.Mupdf),  (s, q, io) => new Cube.Pdf.Mupdf.DocumentReader(s, q, io)  },
             };

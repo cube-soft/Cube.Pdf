@@ -25,7 +25,8 @@ namespace Cube.Pdf
     /// Permission
     ///
     /// <summary>
-    /// 暗号化されている PDF ファイルで許可されている操作を表すクラスです。
+    /// Represents permissions of various operations with the encrypted
+    /// PDF document.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -38,7 +39,7 @@ namespace Cube.Pdf
         /// Permission
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the Permission class.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -49,10 +50,11 @@ namespace Cube.Pdf
         /// Permission
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the Permission class with the
+        /// specified value.
         /// </summary>
         ///
-        /// <param name="src">許可状態を表す値</param>
+        /// <param name="src">Value for permissions.</param>
         ///
         /* ----------------------------------------------------------------- */
         public Permission(long src)
@@ -71,16 +73,16 @@ namespace Cube.Pdf
         /// Print
         ///
         /// <summary>
-        /// 印刷操作の許可設定を取得または設定します。
+        /// Gets or sets a permission for printing.
         /// </summary>
         ///
         /// <remarks>
-        /// Print のみ Restrict と言う許可状態（低品質での印刷を許可）が
-        /// 存在します。
+        /// The PermissionMethod.Restrict value may be used only in
+        /// the Print property.
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod Print
+        public PermissionValue Print
         {
             get => GetPrintPermission();
             set => SetPrintPermission(value);
@@ -88,33 +90,18 @@ namespace Cube.Pdf
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Assemble
-        ///
-        /// <summary>
-        /// ページの挿入、削除、回転、しおりとサムネイルの作成に関する
-        /// 許可設定を取得または設定します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public PermissionMethod Assemble
-        {
-            get => Get(PermissionFlags.ModifyPagesAndBookmarks);
-            set => Set(PermissionFlags.ModifyPagesAndBookmarks, value);
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
         /// ModifyContents
         ///
         /// <summary>
-        /// 内容の編集操作の許可設定を取得または設定します。
+        /// Gets or sets a permission for modifing the contents of the PDF
+        /// document.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod ModifyContents
+        public PermissionValue ModifyContents
         {
-            get => Get(PermissionFlags.ModifyContents);
-            set => Set(PermissionFlags.ModifyContents, value);
+            get => GetModifyContentsPermission();
+            set => SetModifyContentsPermission(value);
         }
 
         /* ----------------------------------------------------------------- */
@@ -122,11 +109,12 @@ namespace Cube.Pdf
         /// CopyContents
         ///
         /// <summary>
-        /// 内容の選択/コピー操作の許可設定を取得または設定します。
+        /// Gets or sets a permission for coping or otherwise extracting
+        /// text and graphics from the PDF document.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod CopyContents
+        public PermissionValue CopyContents
         {
             get => Get(PermissionFlags.CopyOrExtractContents);
             set => Set(PermissionFlags.CopyOrExtractContents, value);
@@ -137,12 +125,13 @@ namespace Cube.Pdf
         /// Accessibility
         ///
         /// <summary>
-        /// アクセシビリティ（視覚に障害を持つユーザに対して、読み上げ機能
-        /// を提供する）のための内容抽出操作の許可設定を取得または設定します。
+        /// Gets or sets a permission for extracting text and graphics
+        /// in support of accessibility to users with disabilities or
+        /// for other purposes.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod Accessibility
+        public PermissionValue Accessibility
         {
             get => Get(PermissionFlags.ExtractContentsForAccessibility);
             set => Set(PermissionFlags.ExtractContentsForAccessibility, value);
@@ -153,12 +142,12 @@ namespace Cube.Pdf
         /// ModifyAnnotations
         ///
         /// <summary>
-        /// 注釈の追加・編集、フォームの追加・編集・入力操作の許可設定を
-        /// 取得または設定します。
+        /// Gets or sets a permission for adding or modifing text
+        /// annotations, fill in interactive form fields.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod ModifyAnnotations
+        public PermissionValue ModifyAnnotations
         {
             get => Get(PermissionFlags.ModifyAnnotations);
             set => Set(PermissionFlags.ModifyAnnotations, value);
@@ -169,11 +158,12 @@ namespace Cube.Pdf
         /// InputForm
         ///
         /// <summary>
-        /// フォームの入力操作の許可設定を取得または設定します。
+        /// Gets or sets a permission for filling in existing interactive
+        /// form fields (including signature fields).
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public PermissionMethod InputForm
+        public PermissionValue InputForm
         {
             get => Get(PermissionFlags.InputForm);
             set => Set(PermissionFlags.InputForm, value);
@@ -184,7 +174,8 @@ namespace Cube.Pdf
         /// Value
         ///
         /// <summary>
-        /// 各種許可状態を表す値を取得します。
+        /// Gets or sets the raw value that represents permissions of
+        /// all operations.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -199,33 +190,47 @@ namespace Cube.Pdf
         /// Get
         ///
         /// <summary>
-        /// 指定されたフラグの許可状態を取得します。
+        /// Gets the permission for the specified operation.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private PermissionMethod Get(PermissionFlags src) =>
-            _flags.HasFlag(src) ? PermissionMethod.Allow : PermissionMethod.Deny;
+        private PermissionValue Get(PermissionFlags src) =>
+            _flags.HasFlag(src) ? PermissionValue.Allow : PermissionValue.Deny;
 
         /* ----------------------------------------------------------------- */
         ///
         /// GetPrintPermission
         ///
         /// <summary>
-        /// 印刷に関する許可状態を取得します。
+        /// Gets the permission for printing.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private PermissionMethod GetPrintPermission() =>
-            _flags.HasFlag(PermissionFlags.PrintHighQuality) ? PermissionMethod.Allow :
-            _flags.HasFlag(PermissionFlags.Print)            ? PermissionMethod.Restrict :
-                                                               PermissionMethod.Deny;
+        private PermissionValue GetPrintPermission() =>
+            _flags.HasFlag(PermissionFlags.PrintHighQuality) ? PermissionValue.Allow :
+            _flags.HasFlag(PermissionFlags.Print)            ? PermissionValue.Restrict :
+                                                               PermissionValue.Deny;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// GetModifyContentsPermission
+        ///
+        /// <summary>
+        /// Gets the permission for modifying contents.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        private PermissionValue GetModifyContentsPermission() =>
+            _flags.HasFlag(PermissionFlags.ModifyContents) ? PermissionValue.Allow :
+            _flags.HasFlag(PermissionFlags.Assemble)       ? PermissionValue.Restrict :
+                                                             PermissionValue.Deny;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Set
         ///
         /// <summary>
-        /// プロパティに値を設定します。
+        /// Sets the value of the specfied permission.
         /// </summary>
         ///
         /// <remarks>
@@ -246,13 +251,13 @@ namespace Cube.Pdf
         /// Set
         ///
         /// <summary>
-        /// 指定されたフラグの許可状態を設定します。
+        /// Sets the value of the specfied permission.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool Set(PermissionFlags src, PermissionMethod method, [CallerMemberName] string name = null)
+        private bool Set(PermissionFlags src, PermissionValue value, [CallerMemberName] string name = null)
         {
-            var dest = method.IsAllowed() ? (_flags | src) : (_flags & ~src);
+            var dest = value.IsAllowed() ? (_flags | src) : (_flags & ~src);
             return Set(ref _flags, dest, name);
         }
 
@@ -261,17 +266,33 @@ namespace Cube.Pdf
         /// SetPrintPermission
         ///
         /// <summary>
-        /// 印刷に関する許可状態を設定します。
+        /// Sets the value for printing permission.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool SetPrintPermission(PermissionMethod method)
+        private bool SetPrintPermission(PermissionValue value)
         {
-            var dest = method.IsAllowed() ?
-                       _flags |  PermissionFlags.PrintHighQuality :
-                       _flags & ~PermissionFlags.PrintHighQuality ;
-            if (method == PermissionMethod.Restrict) dest |= PermissionFlags.Print;
+            var both = PermissionFlags.PrintHighQuality;
+            var dest = value.IsAllowed() ? (_flags | both) : (_flags & ~both);
+            if (value == PermissionValue.Restrict) dest |= PermissionFlags.Print;
             return Set(ref _flags, dest, nameof(Print));
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// SetModifyContentsPermission
+        ///
+        /// <summary>
+        /// Sets the value for modifying contents permission.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        private bool SetModifyContentsPermission(PermissionValue value)
+        {
+            var both = PermissionFlags.ModifyContents | PermissionFlags.Assemble;
+            var dest = value.IsAllowed() ? (_flags | both) : (_flags & ~both);
+            if (value == PermissionValue.Restrict) dest |= PermissionFlags.Assemble;
+            return Set(ref _flags, dest, nameof(ModifyContents));
         }
 
         #endregion

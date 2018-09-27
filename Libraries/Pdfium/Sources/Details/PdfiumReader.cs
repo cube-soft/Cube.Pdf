@@ -17,7 +17,6 @@
 /* ------------------------------------------------------------------------- */
 using Cube.FileSystem;
 using Cube.Pdf.Mixin;
-using Cube.Pdf.Pdfium.PdfiumApi;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -33,25 +32,29 @@ namespace Cube.Pdf.Pdfium
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
-    internal sealed class PdfiumReader : PdfiumLibrary
+    internal sealed class PdfiumReader : PdfiumLibrary, IDisposable
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Source
+        /// PdfiumReader
         ///
         /// <summary>
-        /// 対象となる PDF ファイルのパスを取得します。
+        /// オブジェクトを初期化します。
         /// </summary>
+        ///
+        /// <param name="src">入力ファイルのパス</param>
+        /// <param name="io">I/O オブジェクト</param>
         ///
         /* ----------------------------------------------------------------- */
         private PdfiumReader(string src, IO io)
         {
-            Source  = src;
-            IO      = io;
+            Source = src;
+            IO     = io;
 
-            _stream = IO.OpenRead(src);
+            _stream   = IO.OpenRead(src);
+            _delegate = new ReadDelegate(Read);
         }
 
         #endregion
@@ -124,17 +127,6 @@ namespace Cube.Pdf.Pdfium
         /* ----------------------------------------------------------------- */
         public IEnumerable<Page> Pages { get; private set; }
 
-        /* ----------------------------------------------------------------- */
-        ///
-        /// RawObject
-        ///
-        /// <summary>
-        /// PDFium API へアクセスするためのオブジェクトを取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public IntPtr RawObject { get; private set; }
-
         #endregion
 
         #region Methods
@@ -144,14 +136,14 @@ namespace Cube.Pdf.Pdfium
         /// Create
         ///
         /// <summary>
-        /// PdfReader オブジェクトを生成します。
+        /// PdfiumReader オブジェクトを生成します。
         /// </summary>
         ///
         /// <param name="src">PDF ファイルのパス</param>
         /// <param name="query">パスワード用オブジェクト</param>
         /// <param name="io">I/O オブジェクト</param>
         ///
-        /// <returns>PdfReader</returns>
+        /// <returns>PdfiumReader</returns>
         ///
         /* ----------------------------------------------------------------- */
         public static PdfiumReader Create(string src, IQuery<string> query, IO io)
@@ -176,6 +168,42 @@ namespace Cube.Pdf.Pdfium
             }
         }
 
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Invoke
+        ///
+        /// <summary>
+        /// Invokes the specified action.
+        /// </summary>
+        ///
+        /// <param name="action">Action object.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public void Invoke(Action<IntPtr> action)
+        {
+            if (_disposed) throw new ObjectDisposedException(GetType().Name);
+            action(_core);
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Invoke
+        ///
+        /// <summary>
+        /// Invokes the specified function.
+        /// </summary>
+        ///
+        /// <param name="func">Function object.</param>
+        ///
+        /// <returns>Return value for the specified object.</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public T Invoke<T>(Func<IntPtr, T> func)
+        {
+            if (_disposed) throw new ObjectDisposedException(GetType().Name);
+            return func(_core);
+        }
+
         #region IDisposable
 
         /* ----------------------------------------------------------------- */
@@ -183,18 +211,42 @@ namespace Cube.Pdf.Pdfium
         /// Dispose
         ///
         /// <summary>
-        /// リソースを開放します。
+        /// Releases all resources used by the PdfiumReader.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            try
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Dispose
+        ///
+        /// <summary>
+        /// Releases the unmanaged resources used by the PdfiumReader
+        /// and optionally releases the managed resources.
+        /// </summary>
+        ///
+        /// <param name="disposing">
+        /// true to release both managed and unmanaged resources;
+        /// false to release only unmanaged resources.
+        /// </param>
+        ///
+        /* ----------------------------------------------------------------- */
+        private void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            _disposed = true;
+
+            if (_core != IntPtr.Zero)
             {
-                if (RawObject != IntPtr.Zero) Facade.FPDF_CloseDocument(RawObject);
-                if (disposing) _stream.Dispose();
+                PdfiumApi.FPDF_CloseDocument(_core);
+                _core = IntPtr.Zero;
             }
-            finally { base.Dispose(disposing); }
+            if (disposing) _stream.Dispose();
         }
 
         #endregion
@@ -216,24 +268,24 @@ namespace Cube.Pdf.Pdfium
         /* ----------------------------------------------------------------- */
         private void Load(string password)
         {
-            RawObject = Facade.FPDF_LoadCustomDocument(
+            _core = PdfiumApi.FPDF_LoadCustomDocument(
                 new FileAccess
                 {
                     Length    = (uint)_stream.Length,
-                    GetBlock  = Marshal.GetFunctionPointerForDelegate(new ReadDelegate(Read)),
+                    GetBlock  = Marshal.GetFunctionPointerForDelegate(_delegate),
                     Parameter = IntPtr.Zero,
                 },
                 password
             );
 
-            if (RawObject == IntPtr.Zero) throw GetLoadException();
+            if (_core == IntPtr.Zero) throw GetLastError();
 
-            var n = Facade.FPDF_GetPageCount(RawObject);
+            var n = PdfiumApi.FPDF_GetPageCount(_core);
 
-            Encryption = EncryptionFactory.Create(RawObject, password);
+            Encryption = EncryptionFactory.Create(this, password);
             File       = CreateFile(password, n, !Encryption.OpenWithPassword);
-            Pages      = new ReadOnlyPageList(RawObject, File);
-            Metadata   = MetadataFactory.Create(RawObject);
+            Pages      = new ReadOnlyPageList(this, File);
+            Metadata   = MetadataFactory.Create(this);
         }
 
         /* ----------------------------------------------------------------- */
@@ -288,6 +340,9 @@ namespace Cube.Pdf.Pdfium
 
         #region Fields
         private readonly System.IO.Stream _stream;
+        private readonly ReadDelegate _delegate;
+        private IntPtr _core;
+        private bool _disposed;
         #endregion
     }
 }

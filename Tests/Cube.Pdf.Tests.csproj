@@ -74,7 +74,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AlphaFS">
-      <HintPath>..\..\packages\AlphaFS.2.2.1\lib\net45\AlphaFS.dll</HintPath>
+      <HintPath>..\..\packages\AlphaFS.2.2.6\lib\net45\AlphaFS.dll</HintPath>
     </Reference>
     <Reference Include="Cube.Core">
       <HintPath>..\..\packages\Cube.Core.1.11.0\lib\net45\Cube.Core.dll</HintPath>
@@ -108,9 +108,9 @@
     <Compile Include="Sources\Ghostscript\DocumentConverterTest.cs" />
     <Compile Include="Sources\Ghostscript\FormatTest.cs" />
     <Compile Include="Sources\Ghostscript\ImageConverterTest.cs" />
-    <Compile Include="Sources\Itext\DocumentReaderTest.cs" />
-    <Compile Include="Sources\Itext\DocumentWriterTest.cs" />
-    <Compile Include="Sources\Pdfium\DocumentRendererTest.cs" />
+    <Compile Include="Sources\Itext\ItextReaderTest.cs" />
+    <Compile Include="Sources\Itext\ItextWriterTest.cs" />
+    <Compile Include="Sources\Pdfium\PdfiumRendererTest.cs" />
     <Compile Include="Sources\AngleTest.cs" />
     <Compile Include="Sources\EncryptionTest.cs" />
     <Compile Include="Sources\FileTest.cs" />

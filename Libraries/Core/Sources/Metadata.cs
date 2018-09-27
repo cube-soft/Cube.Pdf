@@ -24,7 +24,7 @@ namespace Cube.Pdf
     /// Metadata
     ///
     /// <summary>
-    /// PDF ファイルのメタ情報を保持するためのクラスです。
+    /// Represents a metadata in the PDF document.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -37,7 +37,7 @@ namespace Cube.Pdf
         /// Version
         ///
         /// <summary>
-        /// PDF ファイルのバージョンを取得または設定します。
+        /// Gets or sets a version of the PDF document.
         /// </summary>
         ///
         /// <remarks>
@@ -59,7 +59,7 @@ namespace Cube.Pdf
         /// Author
         ///
         /// <summary>
-        /// 著者を取得または設定します。
+        /// Gets or sets an author.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -74,7 +74,7 @@ namespace Cube.Pdf
         /// Title
         ///
         /// <summary>
-        /// タイトルを取得または設定します。
+        /// Gets or sets a title.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -89,7 +89,7 @@ namespace Cube.Pdf
         /// Subject
         ///
         /// <summary>
-        /// サブタイトルを取得または設定します。
+        /// Gets or sets a subject.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -104,7 +104,7 @@ namespace Cube.Pdf
         /// Keywords
         ///
         /// <summary>
-        /// キーワードを取得または設定します。
+        /// Gets or sets a keywords.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -119,7 +119,7 @@ namespace Cube.Pdf
         /// Creator
         ///
         /// <summary>
-        /// PDF の作成、編集を行うアプリケーション名を取得または設定します。
+        /// Gets or sets a name of program that creates the PDF document.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -134,8 +134,7 @@ namespace Cube.Pdf
         /// Producer
         ///
         /// <summary>
-        /// PDF の作成・編集を行う際に使用したプリンタドライバ、ライブラリ等
-        /// の名前を取得または設定します。
+        /// Gets or sets a name of program that creates the PDF document.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -147,30 +146,30 @@ namespace Cube.Pdf
 
         /* ----------------------------------------------------------------- */
         ///
-        /// ViewOption
+        /// Viewer
         ///
         /// <summary>
-        /// PDF ファイルの表示方法を取得または設定します。
+        /// Gets or sets a value of viewer preferences.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public ViewOption ViewOption
+        public ViewerPreferences Viewer
         {
-            get => _option;
-            set => SetProperty(ref _option, value);
+            get => _viewer;
+            set => SetProperty(ref _viewer, value);
         }
 
         #endregion
 
         #region Fields
-        private Version _version = new Version(1, 2);
+        private Version _version = new Version(1, 7);
         private string _author = string.Empty;
         private string _title = string.Empty;
         private string _subject = string.Empty;
         private string _keywords = string.Empty;
         private string _creator = string.Empty;
         private string _producer = string.Empty;
-        private ViewOption _option = ViewOption.PageOnly;
+        private ViewerPreferences _viewer = ViewerPreferences.OneColumn;
         #endregion
     }
 }

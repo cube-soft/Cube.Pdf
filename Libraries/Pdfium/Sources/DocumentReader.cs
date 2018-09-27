@@ -139,11 +139,10 @@ namespace Cube.Pdf.Pdfium
         /// <param name="page">ページ情報</param>
         /// <param name="point">描画開始座標</param>
         /// <param name="size">描画サイズ</param>
-        /// <param name="rotation">回転角度</param>
         ///
         /* ----------------------------------------------------------------- */
-        public void Render(Graphics dest, Page page, PointF point, SizeF size, Angle rotation) =>
-            _core.Render(dest, page, point, size, rotation, 0);
+        public void Render(Graphics dest, Page page, PointF point, SizeF size) =>
+            _core.Render(dest, page, point, size, 0);
 
         /* ----------------------------------------------------------------- */
         ///
@@ -160,7 +159,7 @@ namespace Cube.Pdf.Pdfium
         /* ----------------------------------------------------------------- */
         protected override void Dispose(bool disposing)
         {
-            _core.Dispose();
+            _core?.Dispose();
         }
 
         #endregion
